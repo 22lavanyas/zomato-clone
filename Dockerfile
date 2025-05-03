@@ -1,32 +1,22 @@
-# Use an official Node.js image as the base (LTS version for stability)
-FROM node:18-alpine AS builder
+# Build Stage
+FROM node:18-alpine as builder
 
-# Set the working directory inside the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json first (Leverage Docker cache)
 COPY package*.json ./
+RUN npm ci
 
-# Install dependencies in a clean environment
-RUN npm ci --only=production
-
-# Copy the rest of the application source code
 COPY . .
+RUN NODE_OPTIONS=--openssl-legacy-provider npm run build
 
-# Build the React app
-RUN npm run build
+# Production Stage
+FROM nginx:alpine
 
-# ---- Production Stage ----
-FROM node:18-alpine
+# Copy build files to Nginx public directory
+COPY --from=builder /app/build /usr/share/nginx/html
 
-# Set the working directory
-WORKDIR /app
+# Expose port
+EXPOSE 80
 
-# Copy the built React app from the builder stage
-COPY --from=builder /app .
-
-# Expose the port the app runs on
-EXPOSE 3000
-
-# Start the application
-CMD ["npm", "start"]
+# Start NGINX
+CMD ["nginx", "-g", "daemon off;"]
