@@ -2,6 +2,8 @@
  
 
 🚀 **A full-stack Zomato Clone with DevSecOps integration for a secure and scalable deployment.**  
+
+![ZOMATO](./public/zomato-clone.png)
  
 
 ## 🔹 **Key Features:**  
